@@ -4,20 +4,21 @@ import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFile
 import firrtl.annotations.MemoryLoadFileType
 
-class IFStage(val memWidth : Int, val memDepth : Int) extends Module{
+class IFStage(val memWidth : Int, val memDepth : Int, val pcwidth : Int =32) extends Module{
   // Default memWidth = 32, memDepth = 1024
  val io = IO(new Bundle() {
 
    val pcUpdate = Input(UInt(1.W))
    val Instrucion = Output(UInt(memWidth.W))
+   val PC = Output(UInt(pcwidth.W))
 
 
 
 
- });
+ })
 
   //val PC = RegInit(0.U(UInt(memWidth.W)))
-  val PC = RegInit(0.U((memDepth).W))
+  val PC = RegInit(0.U(pcwidth.W))
   //val programMemory = Mem(memDepth,UInt(memWidth.W))
   val programMemory = Mem(memDepth,UInt(memWidth.W))
 
@@ -41,7 +42,8 @@ class IFStage(val memWidth : Int, val memDepth : Int) extends Module{
   loadMemoryFromFile(programMemory, "scala/ROM.hex", MemoryLoadFileType.Hex)
  // Loaded the Instrction values
   io.Instrucion := Cat(programMemory(l3),programMemory(l2),programMemory(l1),programMemory(l0))
-  printf("The PC = %d and Instruction is 0x%x",PC,io.Instrucion)
+//  printf("The PC = %d and Instruction is 0x%x",PC,io.Instrucion)
+ io.PC := PC // Need to sent the next Address location to pipeline
 
 
 
